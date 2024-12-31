@@ -1,0 +1,194 @@
+<!DOCTYPE html>  
+<html lang="ja">  
+<head>  
+  <meta charset="UTF-8">  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+  <title>おみくじページ</title>  
+  <link href="https://fonts.googleapis.com/css2?family=Sawarabi+Mincho&display=swap" rel="stylesheet">  
+  <style>  
+    body {  
+      font-family: 'Sawarabi Mincho', serif;  
+      text-align: center;  
+      background-image: url('https://japaclip.com/files/oshogatsu.png');  
+      background-size: cover;  
+      background-position: center;  
+      color: #ee7800;  
+      margin: 0;  
+      padding: 0;  
+    }  
+    h1 {  
+      margin-top: 50px;  
+      font-size: 36px;  
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);  
+    }  
+    .button-container {  
+      margin-top: 20px;  
+    }  
+    button {  
+      background-color: #ff7f50;  
+      color: #ffffff;  
+      border: none;  
+      border-radius: 5px;  
+      padding: 10px 20px;  
+      font-size: 18px;  
+      cursor: pointer;  
+      transition: background-color 0.3s ease;  
+    }  
+    button:hover {  
+      background-color: #ff6347;  
+    }  
+    #result {  
+      font-size: 24px;  
+      margin-top: 20px;  
+      opacity: 0;  
+      transition: opacity 1s ease-in-out;  
+    }  
+    #result.visible {  
+      opacity: 1;  
+    }  
+    .card {  
+      border: 2px solid #ff7f50;  
+      border-radius: 10px;  
+      padding: 20px;  
+      background-color: #fff;  
+      color: #333;  
+      display: inline-block;  
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);  
+      font-size: 18px;  
+      margin-top: 20px;  
+    }  
+    img {  
+      margin-top: 20px;  
+      width: 200px;  
+    }  
+    .advice-card {  
+      border: 2px solid #ff7f50;  
+      border-radius: 10px;  
+      padding: 5px;  
+      background-color: #fff8dc;  
+      color: #333;  
+      display: inline-block;  
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);  
+      font-size: 18px;  
+      margin-top: 5px; 
+      width: 90%; 
+      max-width: 600px; 
+      text-align: left; 
+      white-space: pre-line; /* 改行を反映 */ 
+    } 
+  </style>  
+</head>  
+<body>  
+  <h1>自作おみくじスクリプト<br>今年の運勢は？</h1>  
+  <img src="https://japaclip.com/files/omikuji-torii.png" alt="おみくじイラスト">  
+  <div class="button-container">  
+    <button onclick="showOmikuji()">結果を見る</button>  
+    <button id="sound-toggle-btn" onclick="toggleSound()">サウンドON</button> <!-- サウンドONを初期表示に変更 -->
+  </div>  
+  <div id="result" class="card">結果を表示するボタンを押してください。</div>  
+  <div id="advice" class="advice-card">アドバイスがここに表示されます。</div>  
+  <audio id="omikujiSound" src="https://pocket-se.info/se/garagara2.mp3"></audio>  
+  <footer> 
+    <p>ソースコードはこちら: <a href="https://github.com/your-repository-link" target="_blank">GitHub</a>問い合わせ:<a href="https://discordapp.com/users/" target="_blank">Discord</a></p> 
+  </footer> 
+  <script>  
+    let adviceData = { 
+"NR": { 
+    "願望": ["あんまり欲張らん方がいいかも。挑戦するのは吉。"], 
+    "勉学": ["がんば。何やってるんですか！勉強してください！"], 
+    "ガチャ": ["引き際を見極めよう。天井に注意。"], 
+    "サブカル": ["あんまり見ないアニメを見るのも吉。「世話焼きキツネの仙狐さん」めっちゃおもろいよ。"], 
+    "趣味": ["新しい趣味見つけるといいかも。最近ギターやってるんだけど結構おすすめ。"], 
+    "一言": ["嫌なことあっても切り替えていこう。愚痴くらいなら聞くで。"] 
+}, 
+"SR": { 
+    "願望": ["だいぶ叶う。"], 
+    "勉学": ["大学大変よな、来年も頑張れ。受験ニキネキは受験がんばれ。"], 
+    "ガチャ": ["良いの出るよ。たぶん。出たらお裾分けしてくれ。"], 
+    "サブカル": ["意外なアニメに出会えるかも。おもろいアニメ見つけたら紹介してな。"], 
+    "趣味": ["新しいこと始めると世界広がるかもよ。友達誘うのもアリ。"], 
+    "一言": ["ご飯はちゃんと食べてな。元気が一番大事。"] 
+}, 
+"SSR": { 
+    "願望": ["今がチャンス！パチでいう赤保留",], 
+    "勉学": ["今の努力、ちゃんと報われる。"], 
+    "ガチャ": ["神引きの予感!推しを迎える準備はOK？"], 
+    "サブカル": ["配信系もいいけど、映画館で観るのも特別な体験になるかも！"], 
+    "趣味": ["やり込むほど楽しくなる時期！好きなことをとことん楽しもう。"], 
+    "一言": ["周りの人も大事にね。感謝の気持ちを伝えるといいことあるよ。"] 
+}, 
+"UR": { 
+    "願望": ["願い叶いまくり！。"], 
+    "勉学": ["モチベ爆上がりのタイミング！この波に乗っちゃおう。"], 
+    "ガチャ": ["推しが微笑む最高のタイミング。欲しいもの全部来るかも！"], 
+    "サブカル": ["新しい推しとの出会いがある予感。沼にハマる覚悟で！リバリバっていうソシャゲおすすめなんだけどさ..."], 
+    "趣味": ["世界に一つの作品を生み出せそう！自分の才能信じて！"], 
+    "一言": ["easyな一年。まあこのUR1%だからこのおみくじ引けてる時点で運が向いてる。"] 
+}, 
+"シークレット": { 
+    "一言": ["これ引いた？マ？こいつ0.1%だからスクショ撮ってdiscordかLINEで送ってください。なにか景品用意しときます。"] 
+      }, 
+ 
+    }; 
+ 
+    let soundEnabled = true; // 初期状態で音がON 
+
+    function showOmikuji() { 
+  // 運勢とその確率（確率の合計は1にする） 
+  const omikujiResults = [ 
+    { result: "NR", weight: 0.5 }, 
+    { result: "SR", weight: 0.3 },   
+    { result: "SSR", weight: 0.189 },  
+    { result: "UR", weight: 0.01 },  
+    { result: "シークレット", weight: 0.001 }, 
+  ]; 
+ 
+  // 確率に基づいてランダムに運勢を選ぶ 
+  const random = Math.random(); 
+  let cumulativeWeight = 0; 
+  let selectedResult = ""; 
+ 
+  for (const item of omikujiResults) { 
+    cumulativeWeight += item.weight; 
+    if (random < cumulativeWeight) { 
+      selectedResult = item.result; 
+      break; 
+    } 
+  } 
+ 
+  const resultElement = document.getElementById("result"); 
+  const adviceElement = document.getElementById("advice"); 
+ 
+  resultElement.textContent = selectedResult; 
+  resultElement.classList.add("visible"); 
+ 
+  // 運勢ごとに項目ごとのアドバイスを表示 
+  let adviceText = ""; 
+  const categories = Object.keys(adviceData[selectedResult]); 
+  categories.forEach(category => { 
+    const randomAdvice = adviceData[selectedResult][category][Math.floor(Math.random() * adviceData[selectedResult][category].length)]; 
+    adviceText += `${category}:\n${randomAdvice}\n\n`; 
+  }); 
+ 
+  if (selectedResult === "シークレット") { 
+    adviceText += '<a href="https://discordapp.com/users/" target="_blank">Discordでこの結果を報告してください</a>'; 
+  } 
+  adviceElement.textContent = adviceText; 
+ 
+  // 音がONの場合、音を再生 
+  if (soundEnabled) { 
+    const sound = document.getElementById("omikujiSound"); 
+    sound.play(); 
+  } 
+} 
+ 
+function toggleSound() { 
+  soundEnabled = !soundEnabled; // サウンド状態を切り替える 
+  const soundButton = document.getElementById("sound-toggle-btn"); 
+  soundButton.textContent = soundEnabled ? "現在サウンドON" : "現在サウンドOFF"; // ボタンのテキストを更新
+} 
+ 
+</script> 
+ 
+</body>  
+</html>
